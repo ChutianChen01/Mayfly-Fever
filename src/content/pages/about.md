@@ -1,15 +1,17 @@
 ---
 title: About
-headline: Engineer, occasional photographer, permanent noticer of small details.
-portrait: ""
+headline: Graduate student in synthetic biology, occasional photographer,
+  permanent noticer of small details.
 location: United Kingdom
 focus:
   - label: Backend & Systems
-    description: Services, data pipelines, and the boring reliability work that keeps them up.
+    description: Services, data pipelines, and the boring reliability work that
+      keeps them up.
   - label: Data & Tooling
     description: Internal tools that shorten the distance between a question and an answer.
   - label: Craft
-    description: Readable code, honest documentation, and interfaces that explain themselves.
+    description: Readable code, honest documentation, and interfaces that explain
+      themselves.
 skills:
   - group: Languages
     items:
@@ -31,7 +33,6 @@ skills:
       - CI/CD
       - Technical writing
 ---
-
 I am an engineer who likes problems that start out badly defined. Most of my
 best work has begun with somebody saying "this is probably impossible, but…"
 and ended with a system that quietly does the job every day without anyone
