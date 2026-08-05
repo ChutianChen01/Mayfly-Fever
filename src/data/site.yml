@@ -1,6 +1,6 @@
 name: Chutian Chen
 title: Chutian Chen — Graduate Student
-tagline: Graduate student working on bioengineering in the Biochemistry,
+tagline: Graduate student working on synthetic biology in the Biochemistry,
   Microbiology, and Molecular Biology (BMMB) program at The Pennsylvania State
   University.
 roles:
@@ -24,3 +24,4 @@ home:
     - label: Writing
       href: /blog
 footer_note: Built with Astro. Words and photographs are my own.
+availability_label: Open to new opportunities
