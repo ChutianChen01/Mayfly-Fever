@@ -32,6 +32,7 @@ skills:
       - Observability
       - CI/CD
       - Technical writing
+portrait: /media/tempImageVL4Dlq.jpg
 ---
 I am an engineer who likes problems that start out badly defined. Most of my
 best work has begun with somebody saying "this is probably impossible, but…"
