@@ -1,0 +1,90 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { url } from '../lib/url';
+import { nav } from '../lib/site';
+---
+
+<Base title="Lost in the vortex" description="That page does not exist.">
+  <section class="container notfound">
+    <p class="eyebrow">Error 404</p>
+    <h1 class="display title-xl notfound__code">404</h1>
+    <p class="lede notfound__lede">
+      This page has drifted out of the vortex — or never existed in this timeline to begin with.
+    </p>
+
+    <div class="notfound__actions">
+      <a class="btn btn--cyan" href={url('/')}>
+        Return home
+        <Icon name="arrow" size={15} />
+      </a>
+    </div>
+
+    <nav class="notfound__nav" aria-label="Site sections">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={url(item.href)}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    min-height: 65svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: var(--section);
+    text-align: center;
+    align-items: center;
+  }
+
+  .notfound__code {
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 60px rgba(34, 211, 238, 0.45);
+  }
+
+  .notfound__lede {
+    margin-top: 1.25rem;
+    max-width: 46ch;
+  }
+
+  .notfound__actions {
+    margin-top: 2rem;
+  }
+
+  .notfound__nav {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    width: min(100%, 520px);
+  }
+
+  .notfound__nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .notfound__nav a {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .notfound__nav a:hover {
+    color: var(--cyan);
+  }
+</style>

@@ -1,0 +1,63 @@
+---
+/**
+ * Lightly obfuscated email link.
+ *
+ * The address is never written into the HTML as a plain `mailto:` string.
+ * Instead the local part and domain are stored in separate data attributes and
+ * reassembled on load, which defeats the naive scrapers that just regex the
+ * page source. A determined harvester will still get it — this is a speed
+ * bump, not a lock — but it costs nothing and cuts the obvious traffic.
+ *
+ * Without JavaScript the link still renders readably as "you [at] example.com",
+ * so the address is never actually hidden from a human.
+ *
+ * Pass children to use a custom label (an icon, say) instead of the address.
+ */
+interface Props {
+  email: string;
+  class?: string;
+  label?: string;
+}
+
+const { email, class: className, label } = Astro.props;
+const [user, domain] = email.split('@');
+const hasCustomLabel = Astro.slots.has('default');
+---
+
+<a
+  class:list={['email', className]}
+  href="#"
+  data-user={user}
+  data-domain={domain}
+  aria-label={label ?? `Email ${user} at ${domain}`}
+>
+  {
+    hasCustomLabel ? (
+      <slot />
+    ) : (
+      <span class="email__text">
+        {user}
+        <span class="email__at"> [at] </span>
+        {domain}
+      </span>
+    )
+  }
+</a>
+
+<script>
+  // Reassemble every obfuscated address once the page is interactive. Links
+  // that use a custom label have no `.email__text`, so only the href changes.
+  document.querySelectorAll<HTMLAnchorElement>('a.email[data-user][data-domain]').forEach((el) => {
+    const address = `${el.dataset.user}@${el.dataset.domain}`;
+    el.href = `mailto:${address}`;
+    const text = el.querySelector('.email__text');
+    if (text) text.textContent = address;
+  });
+</script>
+
+<style>
+  .email {
+    font-family: var(--font-mono);
+    word-break: break-word;
+  }
+</style>

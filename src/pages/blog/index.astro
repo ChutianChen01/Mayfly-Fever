@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import PostCard from '../../components/PostCard.astro';
+import Icon from '../../components/Icon.astro';
+import { site } from '../../lib/site';
+import { url } from '../../lib/url';
+import { getPosts } from '../../lib/content';
+
+const posts = await getPosts();
+---
+
+<Base title="Writing" description={`Notes and essays by ${site.name}.`}>
+  <PageHeader
+    eyebrow="Transmissions"
+    title="Writing"
+    lede="Things I had to work out the hard way and could not find written down anywhere."
+  >
+    <a class="btn btn--ghost feed-link" href={url('/rss.xml')}>
+      <Icon name="rss" size={14} />
+      RSS
+    </a>
+  </PageHeader>
+
+  <section class="container blog-list">
+    {
+      posts.length === 0 ? (
+        <div class="empty">
+          <p>No posts yet. Write your first one under “Blog posts” in the CMS.</p>
+        </div>
+      ) : (
+        <div class="grid grid--2">
+          {posts.map((post, i) => (
+            <PostCard post={post} delay={(i % 2) * 80} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .feed-link {
+    margin-top: 1.5rem;
+  }
+
+  .blog-list {
+    padding-bottom: var(--section);
+  }
+</style>

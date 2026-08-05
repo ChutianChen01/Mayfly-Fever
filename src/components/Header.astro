@@ -1,0 +1,334 @@
+---
+import { site, nav } from '../lib/site';
+import { url } from '../lib/url';
+
+/**
+ * Site header.
+ *
+ * Progressive enhancement note: the nav list is visible by default, so with
+ * JavaScript disabled it simply wraps onto its own line and everything stays
+ * reachable. The inline script adds `data-collapsible`, which is what turns on
+ * the mobile menu-button behaviour.
+ */
+
+// Normalise both sides before comparing so `/blog`, `/blog/`, and
+// `/Mayfly-Fever/blog/a-post` all resolve correctly.
+const strip = (p: string) => (p.length > 1 ? p.replace(/\/+$/, '') : p);
+const current = strip(Astro.url.pathname);
+
+const isActive = (href: string) => {
+  const target = strip(url(href));
+  return current === target || current.startsWith(`${target}/`);
+};
+---
+
+<header class="site-header">
+  <div class="site-header__inner container">
+    <a class="brand" href={url('/')}>
+      <span class="brand__mark" aria-hidden="true"></span>
+      <span class="brand__name">{site.name}</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle__bars" aria-hidden="true"></span>
+      <span class="sr-only">Menu</span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="Primary">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={url(item.href)}
+                class:list={['site-nav__link', { 'is-active': isActive(item.href) }]}
+                aria-current={isActive(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      {
+        site.available && (
+          <span class="pill nav-pill">
+            <span class="pill__dot" />
+            {site.availability_label ?? 'Available'}
+          </span>
+        )
+      }
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector<HTMLElement>('.site-header');
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const nav = document.getElementById('site-nav');
+
+  if (header && toggle && nav) {
+    // Only now does the collapsed mobile layout switch on — see the note above.
+    header.dataset.collapsible = 'true';
+
+    toggle.addEventListener('click', () => {
+      const open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      header.dataset.open = String(!open);
+    });
+
+    // Close after following a link, and on Escape.
+    nav.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) {
+        toggle.setAttribute('aria-expanded', 'false');
+        header.dataset.open = 'false';
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && header.dataset.open === 'true') {
+        toggle.setAttribute('aria-expanded', 'false');
+        header.dataset.open = 'false';
+        toggle.focus();
+      }
+    });
+  }
+
+  // Add a solid backing to the header once the page scrolls, so text never
+  // sits directly on top of a photograph.
+  const onScroll = () => {
+    header?.toggleAttribute('data-scrolled', window.scrollY > 24);
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+</script>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: background var(--slow) var(--ease), border-color var(--slow) var(--ease);
+    border-bottom: 1px solid transparent;
+  }
+
+  .site-header[data-scrolled] {
+    background: rgba(4, 6, 14, 0.72);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border-bottom-color: var(--line);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding-block: 1rem;
+  }
+
+  /* --- Brand --- */
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    color: var(--text-strong);
+    margin-right: auto;
+  }
+
+  .brand__mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--cyan);
+    position: relative;
+    flex: none;
+    box-shadow: 0 0 14px -2px rgba(34, 211, 238, 0.8);
+  }
+
+  .brand__mark::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    opacity: 0.85;
+  }
+
+  .brand__name {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .brand:hover .brand__name {
+    color: var(--cyan);
+  }
+
+  /* --- Nav --- */
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .site-nav ul {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+  }
+
+  .site-nav__link {
+    position: relative;
+    display: block;
+    padding: 0.4rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-radius: var(--radius);
+  }
+
+  .site-nav__link::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.15rem;
+    height: 1px;
+    background: var(--cyan);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--slow) var(--ease);
+  }
+
+  .site-nav__link:hover,
+  .site-nav__link:focus-visible {
+    color: var(--text-strong);
+  }
+
+  .site-nav__link:hover::after,
+  .site-nav__link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .site-nav__link.is-active {
+    color: var(--cyan);
+  }
+
+  .nav-pill {
+    white-space: nowrap;
+  }
+
+  /* --- Mobile toggle --- */
+  .nav-toggle {
+    display: none;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--text);
+  }
+
+  .nav-toggle__bars,
+  .nav-toggle__bars::before,
+  .nav-toggle__bars::after {
+    display: block;
+    width: 17px;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform var(--fast) var(--ease), opacity var(--fast) var(--ease);
+  }
+
+  .nav-toggle__bars::before,
+  .nav-toggle__bars::after {
+    content: '';
+    position: absolute;
+  }
+
+  .nav-toggle__bars::before {
+    transform: translateY(-5.5px);
+  }
+
+  .nav-toggle__bars::after {
+    transform: translateY(5.5px);
+  }
+
+  /* Collapsed layout only applies once JS has confirmed it can reopen it. */
+  @media (max-width: 860px) {
+    .site-header[data-collapsible] .nav-toggle {
+      display: inline-flex;
+      position: relative;
+    }
+
+    .site-header[data-collapsible] .site-nav {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem 0 0.5rem;
+      border-top: 1px solid var(--line);
+      margin-top: 0.5rem;
+    }
+
+    .site-header[data-collapsible][data-open='true'] .site-nav {
+      display: flex;
+    }
+
+    .site-header[data-collapsible] .site-nav ul {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.15rem;
+      width: 100%;
+    }
+
+    .site-header[data-collapsible] .site-nav__link {
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+    }
+
+    .site-header[data-collapsible] .site-nav__link::after {
+      left: 0;
+      right: auto;
+      width: 2rem;
+    }
+
+    .site-header[data-collapsible][data-open='true'] .nav-toggle__bars {
+      background: transparent;
+    }
+
+    .site-header[data-collapsible][data-open='true'] .nav-toggle__bars::before {
+      transform: rotate(45deg);
+    }
+
+    .site-header[data-collapsible][data-open='true'] .nav-toggle__bars::after {
+      transform: rotate(-45deg);
+    }
+  }
+</style>

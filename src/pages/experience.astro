@@ -1,0 +1,177 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Icon from '../components/Icon.astro';
+import Email from '../components/Email.astro';
+import { site } from '../lib/site';
+import { getExperience, formatRange } from '../lib/content';
+
+const roles = await getExperience();
+---
+
+<Base
+  title="Experience"
+  description={`Professional and academic history of ${site.name}.`}
+>
+  <PageHeader
+    eyebrow="Track record"
+    title="Experience"
+    lede="Where I have worked, what I was responsible for, and what actually changed as a result."
+  />
+
+  <section class="container">
+    {
+      roles.length === 0 ? (
+        <div class="empty">
+          <p>No roles added yet. Add your first one under “Experience” in the CMS.</p>
+        </div>
+      ) : (
+        <ol class="timeline">
+          {roles.map((role, i) => {
+            const d = role.data;
+            return (
+              <li class="timeline__item" data-current={String(d.current)} data-reveal data-reveal-delay={i * 70}>
+                <article class="panel role">
+                  <div class="role__head">
+                    <div>
+                      <h2 class="role__title display">{d.role}</h2>
+                      <p class="role__org">
+                        {d.url ? (
+                          <a href={d.url} rel="noopener">
+                            {d.organisation}
+                            <Icon name="external" size={13} />
+                          </a>
+                        ) : (
+                          d.organisation
+                        )}
+                      </p>
+                    </div>
+                    <div class="role__when">
+                      <span class="tag tag--accent">{formatRange(d.start, d.end, d.current)}</span>
+                      {d.kind !== 'Work' && <span class="tag">{d.kind}</span>}
+                    </div>
+                  </div>
+
+                  {d.location && <p class="meta role__loc">{d.location}</p>}
+                  {d.summary && <p class="role__summary muted">{d.summary}</p>}
+
+                  {d.highlights.length > 0 && (
+                    <ul class="highlights">
+                      {d.highlights.map((h) => (
+                        <li>{h}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {d.tech.length > 0 && (
+                    <ul class="tags role__tech">
+                      {d.tech.map((t) => (
+                        <li class="tag">{t}</li>
+                      ))}
+                    </ul>
+                  )}
+                </article>
+              </li>
+            );
+          })}
+        </ol>
+      )
+    }
+
+    {
+      site.email && (
+        <div class="cta panel" data-reveal>
+          <div>
+            <h2 class="display cta__title">Looking for someone?</h2>
+            <p class="muted">
+              I am {site.available ? 'open to new opportunities' : 'happy to talk'}. The fastest
+              way to reach me is email.
+            </p>
+          </div>
+          <Email email={site.email} class="btn" label="Email me">
+            <Icon name="mail" size={15} />
+            Get in touch
+          </Email>
+        </div>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .role {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .role__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .role__title {
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+  }
+
+  .role__org {
+    margin-top: 0.3rem;
+    color: var(--amber);
+    font-size: var(--step-0);
+  }
+
+  .role__org a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .role__org a:hover {
+    text-decoration: underline;
+  }
+
+  .role__when {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .role__loc {
+    margin-top: -0.35rem;
+  }
+
+  .highlights {
+    padding-left: 1.15rem;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .highlights li::marker {
+    color: var(--cyan);
+  }
+
+  .role__tech {
+    margin-top: 0.25rem;
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    border-color: var(--amber-line);
+  }
+
+  .cta__title {
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+  }
+</style>

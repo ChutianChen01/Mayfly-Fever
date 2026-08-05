@@ -1,0 +1,523 @@
+# ===========================================================================
+# Pages CMS configuration.
+#
+# This file is what turns the repository into a visual editor. Go to
+# https://app.pagescms.org, sign in with GitHub, pick this repository, and you
+# get forms for everything below — rich text for posts, drag-and-drop for
+# photos, and a commit made for you on every save.
+#
+# Nothing here is required to run the site. If the CMS ever goes away, every
+# piece of content is still a plain Markdown or YAML file you can edit on
+# github.com directly.
+#
+# IMPORTANT: the fields below must stay in sync with src/content.config.ts.
+# If you add a field in one place, add it in the other, or the CMS will drop
+# it the next time it saves that file.
+# ===========================================================================
+
+media:
+  - name: images
+    label: Images
+    # Uploads land here in the repository...
+    input: public/media
+    # ...and are written into content as /media/whatever.jpg. The site adds
+    # the /Mayfly-Fever prefix at build time, so these paths stay portable if
+    # you ever move to a custom domain.
+    output: /media
+    extensions: [jpg, jpeg, png, webp, avif, gif, svg]
+    categories: [image]
+
+settings:
+  content:
+    merge: true
+
+content:
+  # -----------------------------------------------------------------------
+  # Singletons
+  # -----------------------------------------------------------------------
+  - name: site
+    label: Site settings
+    type: file
+    path: src/data/site.yml
+    format: yaml
+    icon: settings
+    description: Your name, tagline, contact links, and the home page hero.
+    fields:
+      - name: name
+        label: Your name
+        type: string
+        required: true
+        description: Appears in the header, the footer, and page titles.
+
+      - name: title
+        label: Browser tab title
+        type: string
+        required: true
+        description: 'Shown on the home page tab, e.g. "Chutian Chen — Engineer".'
+
+      - name: tagline
+        label: Tagline
+        type: text
+        required: true
+        description: One sentence describing what you do. The most-read line on the site.
+
+      - name: roles
+        label: Rotating roles
+        type: string
+        list:
+          min: 1
+          max: 6
+        description: Short job-title words that cycle in the hero. Keep them under about 20 characters.
+
+      - name: location
+        label: Location
+        type: string
+        description: Region or city only — never a street address on a public site.
+
+      - name: available
+        label: Show "available" badge
+        type: boolean
+        default: true
+
+      - name: availability_label
+        label: Availability text
+        type: string
+        default: Open to new opportunities
+
+      - name: description
+        label: Search engine description
+        type: text
+        description: ~150 characters. Used in Google results and link previews.
+
+      - name: email
+        label: Email address
+        type: string
+        pattern:
+          regex: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+          message: Please enter a valid email address.
+        description: Displayed with light obfuscation so address scrapers have a harder time.
+
+      - name: links
+        label: Profiles
+        type: object
+        fields:
+          - name: github
+            label: GitHub URL
+            type: string
+          - name: linkedin
+            label: LinkedIn URL
+            type: string
+
+      - name: home
+        label: Home page
+        type: object
+        fields:
+          - name: intro
+            label: Introduction paragraph
+            type: text
+            description: Two or three lines under your name.
+          - name: actions
+            label: Hero buttons
+            type: object
+            list:
+              min: 1
+              max: 4
+              collapsible:
+                summary: '{label}'
+            fields:
+              - name: label
+                label: Button text
+                type: string
+                required: true
+              - name: href
+                label: Links to
+                type: select
+                options:
+                  values:
+                    - { value: /about, label: About }
+                    - { value: /experience, label: Experience }
+                    - { value: /projects, label: Projects }
+                    - { value: /blog, label: Writing }
+                    - { value: /photography, label: Photography }
+
+      - name: footer_note
+        label: Footer note
+        type: string
+
+  - name: about
+    label: About page
+    type: file
+    path: src/content/pages/about.md
+    icon: user
+    description: Your personal introduction, skills, and focus areas.
+    fields:
+      - name: title
+        label: Page title
+        type: string
+        required: true
+        default: About
+
+      - name: headline
+        label: Headline
+        type: text
+        description: One line under the page title.
+
+      - name: portrait
+        label: Portrait photo
+        type: image
+        options:
+          media: images
+        description: Optional. Floats beside your bio.
+
+      - name: location
+        label: Based in
+        type: string
+
+      - name: focus
+        label: What I focus on
+        type: object
+        list:
+          max: 6
+          collapsible:
+            summary: '{label}'
+        fields:
+          - name: label
+            label: Area
+            type: string
+            required: true
+          - name: description
+            label: Description
+            type: text
+
+      - name: skills
+        label: Toolkit
+        type: object
+        list:
+          collapsible:
+            summary: '{group}'
+        fields:
+          - name: group
+            label: Group name
+            type: string
+            required: true
+            description: 'e.g. Languages, Platform, Practice'
+          - name: items
+            label: Skills
+            type: string
+            list: true
+
+      - name: body
+        label: Biography
+        type: rich-text
+        description: The main text of your About page.
+
+  # -----------------------------------------------------------------------
+  # Collections
+  # -----------------------------------------------------------------------
+  - name: experience
+    label: Experience
+    type: collection
+    path: src/content/experience
+    icon: briefcase
+    filename: '{fields.organisation}-{fields.role}.md'
+    description: Jobs, internships, research, and education.
+    view:
+      fields: [role, organisation, start, current]
+      primary: role
+      sort: [order, start]
+      default:
+        sort: order
+        order: desc
+    fields:
+      - name: role
+        label: Job title
+        type: string
+        required: true
+
+      - name: organisation
+        label: Company or institution
+        type: string
+        required: true
+
+      - name: location
+        label: Location
+        type: string
+        description: 'Free text: "London, UK", "Remote", "Hybrid — Berlin".'
+
+      - name: start
+        label: Start
+        type: string
+        required: true
+        description: 'Written how you want it shown, e.g. "Mar 2024".'
+
+      - name: end
+        label: End
+        type: string
+        description: Leave blank if this is your current role.
+
+      - name: current
+        label: This is my current role
+        type: boolean
+        default: false
+        description: Shows "Present" and floats this entry to the top.
+
+      - name: kind
+        label: Type
+        type: select
+        default: Work
+        options:
+          values: [Work, Internship, Research, Education, Volunteer]
+
+      - name: summary
+        label: Summary
+        type: text
+        description: One or two sentences on the role itself.
+
+      - name: highlights
+        label: Key achievements
+        type: string
+        list: true
+        description: >-
+          The part recruiters actually read. Lead with the outcome and put a
+          number on it wherever you honestly can.
+
+      - name: tech
+        label: Technologies
+        type: string
+        list: true
+
+      - name: url
+        label: Organisation website
+        type: string
+
+      - name: order
+        label: Sort order
+        type: number
+        default: 0
+        description: Higher numbers appear first.
+
+  - name: projects
+    label: Projects
+    type: collection
+    path: src/content/projects
+    icon: hammer
+    filename: '{primary}.md'
+    description: Projects and tools, each with its own page.
+    view:
+      fields: [title, status, featured, date]
+      primary: title
+      sort: [order, date, title]
+      default:
+        sort: order
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+
+      - name: blurb
+        label: One-line pitch
+        type: text
+        required: true
+        description: Shown on the project card. Keep it to a single sentence.
+
+      - name: date
+        label: Date
+        type: date
+        options:
+          format: yyyy-MM-dd
+
+      - name: status
+        label: Status
+        type: select
+        default: Shipped
+        options:
+          values: [Active, Shipped, Archived, Prototype]
+
+      - name: tech
+        label: Built with
+        type: string
+        list: true
+
+      - name: cover
+        label: Cover image
+        type: image
+        options:
+          media: images
+
+      - name: repo
+        label: Source code URL
+        type: string
+
+      - name: demo
+        label: Live demo URL
+        type: string
+
+      - name: featured
+        label: Show on home page
+        type: boolean
+        default: false
+
+      - name: order
+        label: Sort order
+        type: number
+        default: 0
+        description: Higher numbers appear first.
+
+      - name: draft
+        label: Draft
+        type: boolean
+        default: false
+        description: Drafts are left out of the published site entirely.
+
+      - name: body
+        label: Write-up
+        type: rich-text
+
+  - name: blog
+    label: Blog posts
+    type: collection
+    path: src/content/blog
+    icon: pen
+    filename: '{primary}.md'
+    description: Your writing. New posts publish automatically on save.
+    view:
+      fields: [title, date, draft, tags]
+      primary: title
+      sort: [date, title]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+
+      - name: description
+        label: Summary
+        type: text
+        description: Shown on the blog index and in link previews.
+
+      - name: date
+        label: Published
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+
+      - name: updated
+        label: Last updated
+        type: date
+        options:
+          format: yyyy-MM-dd
+
+      - name: tags
+        label: Tags
+        type: string
+        list: true
+
+      - name: cover
+        label: Cover image
+        type: image
+        options:
+          media: images
+
+      - name: draft
+        label: Draft
+        type: boolean
+        default: false
+        description: Tick this to keep working without publishing.
+
+      - name: body
+        label: Post
+        type: rich-text
+
+  - name: albums
+    label: Photo albums
+    type: collection
+    path: src/content/albums
+    icon: image
+    filename: '{primary}.md'
+    description: Photography, grouped into albums.
+    view:
+      fields: [title, date, location]
+      primary: title
+      sort: [order, date, title]
+      default:
+        sort: order
+        order: desc
+    fields:
+      - name: title
+        label: Album title
+        type: string
+        required: true
+
+      - name: description
+        label: Description
+        type: text
+
+      - name: date
+        label: Date
+        type: date
+        options:
+          format: yyyy-MM-dd
+
+      - name: location
+        label: Location
+        type: string
+        description: Keep it general — a city or region, not an address.
+
+      - name: cover
+        label: Cover image
+        type: image
+        options:
+          media: images
+        description: Optional. Defaults to the first photo in the album.
+
+      - name: gear
+        label: Camera / film
+        type: string
+        description: 'Optional, e.g. "35mm, Portra 800".'
+
+      - name: photos
+        label: Photos
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: '{caption} ({index})'
+        fields:
+          - name: image
+            label: Photo
+            type: image
+            required: true
+            options:
+              media: images
+          - name: caption
+            label: Caption
+            type: string
+            description: Optional. Shown under the photo and in the viewer.
+          - name: alt
+            label: Alt text
+            type: string
+            description: >-
+              Describes the image for screen readers and for anyone whose
+              images fail to load. Falls back to the caption.
+
+      - name: order
+        label: Sort order
+        type: number
+        default: 0
+        description: Higher numbers appear first.
+
+      - name: draft
+        label: Draft
+        type: boolean
+        default: false
+
+      - name: body
+        label: Notes
+        type: rich-text
+        description: Optional text shown above the gallery.

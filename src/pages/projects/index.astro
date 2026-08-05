@@ -1,0 +1,39 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { site } from '../../lib/site';
+import { getProjects } from '../../lib/content';
+
+const projects = await getProjects();
+---
+
+<Base title="Projects" description={`Projects and tools built by ${site.name}.`}>
+  <PageHeader
+    eyebrow="Build log"
+    title="Projects & tools"
+    lede="Things I have made, mostly to solve a problem I actually had. Each one has a longer write-up."
+  />
+
+  <section class="container section--top">
+    {
+      projects.length === 0 ? (
+        <div class="empty">
+          <p>No projects yet. Add one under “Projects” in the CMS.</p>
+        </div>
+      ) : (
+        <div class="grid grid--3">
+          {projects.map((project, i) => (
+            <ProjectCard project={project} delay={(i % 3) * 80} />
+          ))}
+        </div>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .section--top {
+    padding-bottom: var(--section);
+  }
+</style>

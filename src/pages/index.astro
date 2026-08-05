@@ -1,0 +1,268 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import PostCard from '../components/PostCard.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../lib/site';
+import { url } from '../lib/url';
+import { getProjects, getPosts } from '../lib/content';
+
+const allProjects = await getProjects();
+const featured = allProjects.filter((p) => p.data.featured).slice(0, 3);
+// If nothing is flagged as featured, fall back to the most recent few so the
+// home page is never empty.
+const projects = featured.length > 0 ? featured : allProjects.slice(0, 3);
+const posts = (await getPosts()).slice(0, 2);
+---
+
+<Base>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <p class="eyebrow">Personal site</p>
+
+      <h1 class="hero__name display">{site.name}</h1>
+
+      <p class="hero__roles" aria-label={site.roles.join(', ')}>
+        <span class="hero__bracket">&lsaquo;</span>
+        <span class="hero__role" data-roles={JSON.stringify(site.roles)}>{site.roles[0]}</span>
+        <span class="hero__bracket">&rsaquo;</span>
+      </p>
+
+      <p class="hero__tagline">{site.tagline}</p>
+      <p class="hero__intro muted">{site.home.intro}</p>
+
+      <div class="hero__actions">
+        {
+          site.home.actions.map((action, i) => (
+            <a class:list={['btn', { 'btn--cyan': i === 0 }]} href={url(action.href)}>
+              {action.label}
+              <Icon name="arrow" size={15} />
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="hero__links">
+        {
+          site.links?.github && (
+            <a href={site.links.github} rel="me noopener">
+              <Icon name="github" size={16} /> GitHub
+            </a>
+          )
+        }
+        {
+          site.links?.linkedin && (
+            <a href={site.links.linkedin} rel="me noopener">
+              <Icon name="linkedin" size={16} /> LinkedIn
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Selected work -->
+  {
+    projects.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Selected work</p>
+              <h2 class="display title-md">Projects &amp; tools</h2>
+            </div>
+            <a class="btn btn--ghost" href={url('/projects')}>
+              All projects
+              <Icon name="arrow" size={15} />
+            </a>
+          </div>
+
+          <div class="grid grid--3">
+            {projects.map((project, i) => (
+              <ProjectCard project={project} delay={i * 80} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Recent writing -->
+  {
+    posts.length > 0 && (
+      <section class="section section--tight">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Transmissions</p>
+              <h2 class="display title-md">Recent writing</h2>
+            </div>
+            <a class="btn btn--ghost" href={url('/blog')}>
+              All posts
+              <Icon name="arrow" size={15} />
+            </a>
+          </div>
+
+          <div class="grid grid--2">
+            {posts.map((post, i) => (
+              <PostCard post={post} delay={i * 80} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<script>
+  // Cycle the role line with a brief scramble between words. Purely
+  // decorative: the full list is already exposed to assistive tech via the
+  // aria-label on the parent, and this does nothing if the user prefers
+  // reduced motion.
+  const el = document.querySelector<HTMLElement>('.hero__role');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (el && !reduced) {
+    let roles: string[] = [];
+    try {
+      roles = JSON.parse(el.dataset.roles ?? '[]');
+    } catch {
+      roles = [];
+    }
+
+    if (roles.length > 1) {
+      const GLYPHS = '01<>/\\_—+*#';
+      let index = 0;
+
+      const scrambleTo = (next: string) => {
+        const steps = 10;
+        let step = 0;
+        const timer = window.setInterval(() => {
+          step += 1;
+          const settled = Math.floor((next.length * step) / steps);
+          const noise = Array.from({ length: Math.max(0, next.length - settled) })
+            .map(() => GLYPHS[Math.floor(Math.random() * GLYPHS.length)])
+            .join('');
+          el.textContent = next.slice(0, settled) + noise;
+          if (step >= steps) {
+            window.clearInterval(timer);
+            el.textContent = next;
+          }
+        }, 34);
+      };
+
+      window.setInterval(() => {
+        index = (index + 1) % roles.length;
+        scrambleTo(roles[index]);
+      }, 3800);
+    }
+  }
+</script>
+
+<style>
+  .hero {
+    display: flex;
+    align-items: center;
+    min-height: min(88svh, 780px);
+    padding-block: clamp(3rem, 10vw, 6rem);
+  }
+
+  .hero__inner {
+    max-width: 900px;
+  }
+
+  .hero__name {
+    font-size: var(--step-4);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    /* A soft cyan bloom rather than a hard text-shadow. */
+    text-shadow: 0 0 46px rgba(34, 211, 238, 0.35);
+  }
+
+  /* The cyan hairline under the name. */
+  .hero__name::after {
+    content: '';
+    display: block;
+    width: min(320px, 60%);
+    height: 1px;
+    margin-top: 1.1rem;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.7);
+  }
+
+  .hero__roles {
+    margin-top: 1.1rem;
+    font-family: var(--font-mono);
+    font-size: var(--step-1);
+    letter-spacing: 0.14em;
+    color: var(--amber);
+    text-transform: uppercase;
+  }
+
+  .hero__bracket {
+    color: var(--faint);
+  }
+
+  .hero__role {
+    display: inline-block;
+    min-width: 12ch;
+  }
+
+  .hero__tagline {
+    margin-top: 1.75rem;
+    font-size: var(--step-1);
+    color: var(--text-strong);
+    max-width: 40ch;
+    line-height: 1.5;
+  }
+
+  .hero__intro {
+    margin-top: 1.1rem;
+    max-width: 58ch;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.25rem;
+  }
+
+  .hero__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .hero__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .hero__links a:hover {
+    color: var(--cyan);
+  }
+
+  .section--tight {
+    padding-top: 0;
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+</style>

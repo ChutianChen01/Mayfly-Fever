@@ -1,0 +1,263 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Email from '../components/Email.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../lib/site';
+import { asset } from '../lib/url';
+
+const entry = await getEntry('pages', 'about');
+if (!entry) {
+  throw new Error(
+    'Missing src/content/pages/about.md — the About page is built from that file.',
+  );
+}
+
+const { Content } = await render(entry);
+const { headline, portrait, location, focus, skills } = entry.data;
+const portraitSrc = asset(portrait);
+---
+
+<Base title="About" description={headline ?? site.description}>
+  <PageHeader eyebrow="Who I am" title="About" lede={headline} />
+
+  <section class="container about">
+    <div class="about__main" data-reveal>
+      {
+        portraitSrc && (
+          <figure class="portrait">
+            <img src={portraitSrc} alt={`Portrait of ${site.name}`} loading="lazy" decoding="async" />
+          </figure>
+        )
+      }
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    <aside class="about__side">
+      <div class="panel" data-reveal data-reveal-delay="80">
+        <h2 class="side__title">Details</h2>
+        <dl class="details">
+          {
+            location && (
+              <>
+                <dt>Based in</dt>
+                <dd>{location}</dd>
+              </>
+            )
+          }
+          {
+            site.available && (
+              <>
+                <dt>Status</dt>
+                <dd class="details__status">{site.availability_label ?? 'Available'}</dd>
+              </>
+            )
+          }
+          {
+            site.email && (
+              <>
+                <dt>Email</dt>
+                <dd>
+                  <Email email={site.email} />
+                </dd>
+              </>
+            )
+          }
+        </dl>
+
+        <div class="side__links">
+          {
+            site.links?.github && (
+              <a href={site.links.github} rel="me noopener">
+                <Icon name="github" size={16} /> GitHub
+              </a>
+            )
+          }
+          {
+            site.links?.linkedin && (
+              <a href={site.links.linkedin} rel="me noopener">
+                <Icon name="linkedin" size={16} /> LinkedIn
+              </a>
+            )
+          }
+        </div>
+      </div>
+
+      {
+        skills.length > 0 && (
+          <div class="panel" data-reveal data-reveal-delay="140">
+            <h2 class="side__title">Toolkit</h2>
+            {skills.map((group) => (
+              <div class="skill-group">
+                <h3 class="skill-group__label">{group.group}</h3>
+                <ul class="tags">
+                  {group.items.map((item) => (
+                    <li class="tag">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )
+      }
+    </aside>
+  </section>
+
+  {
+    focus.length > 0 && (
+      <section class="section container">
+        <p class="eyebrow">What I focus on</p>
+        <div class="grid grid--3 focus">
+          {focus.map((item, i) => (
+            <div class="panel focus__item" data-reveal data-reveal-delay={i * 80}>
+              <span class="focus__index">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="focus__label display">{item.label}</h3>
+              {item.description && <p class="muted">{item.description}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  @media (min-width: 940px) {
+    .about {
+      grid-template-columns: minmax(0, 1.75fr) minmax(260px, 1fr);
+    }
+  }
+
+  .portrait {
+    float: right;
+    width: min(230px, 40%);
+    margin: 0 0 1.5rem 1.75rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .portrait img {
+    width: 100%;
+    height: auto;
+    filter: saturate(0.9) contrast(1.05);
+  }
+
+  @media (max-width: 560px) {
+    .portrait {
+      float: none;
+      width: 100%;
+      max-width: 260px;
+      margin: 0 0 1.5rem;
+    }
+  }
+
+  .about__side {
+    display: grid;
+    gap: 1.25rem;
+    position: sticky;
+    top: 5.5rem;
+  }
+
+  @media (max-width: 939px) {
+    .about__side {
+      position: static;
+    }
+  }
+
+  .side__title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 1.1rem;
+  }
+
+  .details {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  .details dt {
+    font-family: var(--font-mono);
+    color: var(--faint);
+    letter-spacing: 0.06em;
+  }
+
+  .details dd {
+    margin: 0;
+    color: var(--text);
+  }
+
+  .details__status {
+    color: var(--amber);
+  }
+
+  .side__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .side__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .side__links a:hover {
+    color: var(--cyan);
+  }
+
+  .skill-group + .skill-group {
+    margin-top: 1.25rem;
+  }
+
+  .skill-group__label {
+    font-size: var(--step--1);
+    color: var(--text-strong);
+    margin-bottom: 0.55rem;
+    font-weight: 500;
+  }
+
+  .focus {
+    margin-top: 1.5rem;
+  }
+
+  .focus__item {
+    position: relative;
+  }
+
+  .focus__index {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+  }
+
+  .focus__label {
+    font-size: 1.1rem;
+    margin: 0.6rem 0 0.5rem;
+  }
+</style>

@@ -1,0 +1,30 @@
+---
+/** The standard heading block at the top of every interior page. */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+}
+
+const { eyebrow, title, lede } = Astro.props;
+---
+
+<div class="page-header">
+  <div class="container">
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1 class="display title-lg">{title}</h1>
+    {lede && <p class="lede page-header__lede">{lede}</p>}
+    <slot />
+  </div>
+</div>
+
+<style>
+  .page-header {
+    padding-top: clamp(2.5rem, 7vw, 5rem);
+    padding-bottom: clamp(1.5rem, 4vw, 2.75rem);
+  }
+
+  .page-header__lede {
+    margin-top: 1.1rem;
+  }
+</style>

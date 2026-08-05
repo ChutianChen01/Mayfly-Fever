@@ -1,0 +1,131 @@
+---
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import { url, asset } from '../../lib/url';
+import { getAlbums, albumCover, formatDate } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const albums = await getAlbums();
+  return albums.map((album) => ({
+    params: { slug: album.id },
+    props: { album },
+  }));
+}) satisfies GetStaticPaths;
+
+const { album } = Astro.props;
+const { title, description, date, location, gear, photos } = album.data;
+const { Content } = await render(album);
+---
+
+<Base title={title} description={description} image={albumCover(album)}>
+  <div class="container album-page">
+    <a class="back" href={url('/photography')}>
+      <span aria-hidden="true">←</span> All albums
+    </a>
+
+    <header class="album-head">
+      <h1 class="display title-lg">{title}</h1>
+      {description && <p class="lede">{description}</p>}
+
+      <p class="meta album-head__meta">
+        {date && <time datetime={date.toISOString()}>{formatDate(date)}</time>}
+        {location && <span>{location}</span>}
+        {gear && <span>{gear}</span>}
+        <span>{photos.length} {photos.length === 1 ? 'photograph' : 'photographs'}</span>
+      </p>
+    </header>
+
+    {
+      album.body?.trim() && (
+        <div class="prose album-note">
+          <Content />
+        </div>
+      )
+    }
+
+    {
+      photos.length === 0 ? (
+        <div class="empty">
+          <p>
+            This album has no photographs yet. Open it in the CMS and add some under “Photos”.
+          </p>
+        </div>
+      ) : (
+        <div class="gallery">
+          {photos.map((photo, i) => {
+            const src = asset(photo.image)!;
+            const alt = photo.alt || photo.caption || `${title} — photograph ${i + 1}`;
+            return (
+              <figure class="photo-item">
+                <a
+                  class="photo"
+                  href={src}
+                  data-lightbox
+                  data-caption={photo.caption ?? ''}
+                  data-alt={alt}
+                >
+                  <img src={src} alt={alt} loading="lazy" decoding="async" />
+                </a>
+                {photo.caption && <figcaption>{photo.caption}</figcaption>}
+              </figure>
+            );
+          })}
+        </div>
+      )
+    }
+  </div>
+
+  <Lightbox />
+</Base>
+
+<style>
+  .album-page {
+    padding-top: clamp(2rem, 6vw, 3.5rem);
+    padding-bottom: var(--section);
+  }
+
+  .back {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 2rem;
+  }
+
+  .back:hover {
+    color: var(--cyan);
+  }
+
+  .album-head {
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 2.5rem;
+  }
+
+  .album-head h1 {
+    margin-bottom: 1rem;
+  }
+
+  .album-head__meta {
+    margin-top: 1.25rem;
+  }
+
+  .album-note {
+    margin-bottom: 2.5rem;
+  }
+
+  .photo-item {
+    margin: 0 0 1rem;
+  }
+
+  .photo-item figcaption {
+    padding-top: 0.55rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+</style>

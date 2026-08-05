@@ -1,0 +1,134 @@
+---
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { url, asset } from '../../lib/url';
+import { getProjects, formatDate } from '../../lib/content';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects();
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project } = Astro.props;
+const { title, blurb, tech, cover, repo, demo, status, date } = project.data;
+const { Content } = await render(project);
+const coverSrc = asset(cover);
+---
+
+<Base title={title} description={blurb} image={cover} type="article">
+  <article class="container container--narrow project-page">
+    <a class="back" href={url('/projects')}>
+      <span aria-hidden="true">←</span> All projects
+    </a>
+
+    <header class="project-head">
+      <div class="meta">
+        <span class="tag" data-status={status}>{status}</span>
+        {date && <time datetime={date.toISOString()}>{formatDate(date)}</time>}
+      </div>
+
+      <h1 class="display title-lg">{title}</h1>
+      <p class="lede">{blurb}</p>
+
+      {
+        (repo || demo) && (
+          <div class="project-head__links">
+            {repo && (
+              <a class="btn btn--cyan" href={repo} rel="noopener">
+                <Icon name="github" size={15} />
+                Source
+              </a>
+            )}
+            {demo && (
+              <a class="btn" href={demo} rel="noopener">
+                <Icon name="external" size={15} />
+                Live demo
+              </a>
+            )}
+          </div>
+        )
+      }
+
+      {
+        tech.length > 0 && (
+          <ul class="tags project-head__tech">
+            {tech.map((t) => (
+              <li class="tag">{t}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    {
+      coverSrc && (
+        <img class="project-cover" src={coverSrc} alt="" loading="lazy" decoding="async" />
+      )
+    }
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .project-page {
+    padding-top: clamp(2rem, 6vw, 3.5rem);
+    padding-bottom: var(--section);
+  }
+
+  .back {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 2rem;
+  }
+
+  .back:hover {
+    color: var(--cyan);
+  }
+
+  .project-head {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 2.5rem;
+  }
+
+  .project-head h1 {
+    margin: 0.9rem 0 1rem;
+  }
+
+  .project-head__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .project-head__tech {
+    margin-top: 1.5rem;
+  }
+
+  .project-cover {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    margin-bottom: 2.5rem;
+  }
+
+  .tag[data-status='Active'] {
+    color: var(--amber);
+    background: var(--amber-soft);
+    border-color: var(--amber-line);
+  }
+</style>

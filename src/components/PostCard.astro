@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { url } from '../lib/url';
+import { formatDate } from '../lib/content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  delay?: number;
+}
+
+const { post, delay = 0 } = Astro.props;
+const { title, description, date, tags } = post.data;
+---
+
+<article class="panel panel--link post" data-reveal data-reveal-delay={delay}>
+  <div class="meta">
+    <time datetime={date.toISOString()}>{formatDate(date)}</time>
+  </div>
+
+  <h3 class="post__title display">
+    <a class="stretched" href={url(`/blog/${post.id}`)}>{title}</a>
+  </h3>
+
+  {description && <p class="muted post__desc">{description}</p>}
+
+  {
+    tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((t) => (
+          <li class="tag">#{t}</li>
+        ))}
+      </ul>
+    )
+  }
+</article>
+
+<style>
+  .post {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .post__title {
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
+  }
+
+  .post__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .post:hover .post__title {
+    color: var(--cyan);
+  }
+
+  .post__desc {
+    flex: 1;
+  }
+</style>

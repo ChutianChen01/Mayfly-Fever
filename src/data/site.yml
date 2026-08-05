@@ -1,0 +1,68 @@
+# ---------------------------------------------------------------------------
+# Site-wide settings.
+#
+# Everything here appears in the header, footer, home page hero, and the
+# metadata search engines and social sites read. Edit it in the CMS under
+# "Site settings", or straight on github.com — it is plain YAML.
+#
+# Deliberately no phone number and no street address: this file is public.
+# ---------------------------------------------------------------------------
+
+# Your name, as it should appear in the header and page titles.
+name: Chutian Chen
+
+# Shown in the browser tab after your name, and in search results.
+title: Chutian Chen — Engineer & Builder
+
+# One sentence. This is the single most-read line on the whole site, so make
+# it concrete: what you do, and for whom.
+tagline: >-
+  I build software that turns messy problems into things people can actually
+  use.
+
+# Rotating words in the hero, cycled with a subtle glitch. Keep them short.
+roles:
+  - Software Engineer
+  - Systems Thinker
+  - Photographer
+
+# Free text. Region-level only — no street address on a public site.
+location: United Kingdom
+
+# Set to false to hide the "available" pill in the header.
+available: true
+availability_label: Open to new opportunities
+
+# The 150-character-ish blurb used for search engines and link previews.
+description: >-
+  Personal site of Chutian Chen — engineering work, projects and tools,
+  writing, and photography.
+
+# --- Contact ---------------------------------------------------------------
+# The email is lightly obfuscated when rendered so that naive address
+# scrapers have a harder time, while staying clickable for real visitors.
+email: you@example.com
+
+links:
+  github: https://github.com/ChutianChen01
+  linkedin: https://www.linkedin.com/in/your-handle
+
+# --- Home page -------------------------------------------------------------
+home:
+  # Big statement under your name. Two or three lines is the sweet spot.
+  intro: >-
+    Engineer working across backend systems and data. I like the unglamorous
+    parts — the migration nobody wants to own, the pipeline that quietly stops
+    paging people at 3am — and I like making the result feel obvious in
+    hindsight.
+  # The three calls-to-action in the hero.
+  actions:
+    - label: Experience
+      href: /experience
+    - label: Projects
+      href: /projects
+    - label: Writing
+      href: /blog
+
+# --- Footer ----------------------------------------------------------------
+footer_note: Built with Astro. Words and photographs are my own.
