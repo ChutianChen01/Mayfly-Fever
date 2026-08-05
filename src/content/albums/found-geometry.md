@@ -6,7 +6,7 @@ location: State College, PA
 order: 10
 draft: false
 cover: /media/Mushrooms/Sunset Park Mushrooms - Smaller-6.jpg
-gear: ILCE-6700
+gear: ILCE-6700/Viltrox 35mm F1.7 E
 photos:
   - image: /media/Mushrooms/Sunset Park Mushrooms - Smaller.jpg
   - image: /media/Mushrooms/Sunset Park Mushrooms - Smaller-7.jpg
